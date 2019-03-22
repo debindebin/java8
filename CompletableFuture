@@ -1,0 +1,45 @@
+protected final static ExecutorService ThreadPool = new ThreadPoolExecutor(5,10,20l, TimeUnit.SECONDS
+        ,new LinkedBlockingQueue<>(1000),new ThreadPoolExecutor.CallerRunsPolicy());
+    public static void main(String[] args)throws InterruptedException, ExecutionException, TimeoutException{
+         orderInfo order = new orderInfo();
+         List<CompletableFuture> futures = new ArrayList<>();
+         futures.add(CompletableFuture.runAsync(()->{
+             System.out.println("当前任务Custome"+ Thread.currentThread().getName());
+             order.setCustomerInfo("CustomerInfo");
+         },ThreadPool));
+        futures.add(CompletableFuture.runAsync(()->{
+            System.out.println("当前任务Other"+ Thread.currentThread().getName());
+            order.setOtherInfo("OtherInfo");
+        },ThreadPool));
+        CompletableFuture  allDoneFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+        allDoneFuture.get(10,TimeUnit.SECONDS);
+        System.out.println(order);
+    }
+
+    static class orderInfo{
+        private String customerInfo;
+        private String otherInfo;
+
+        public String getCustomerInfo() {
+            return customerInfo;
+        }
+
+        public void setCustomerInfo(String customerInfo) {
+            this.customerInfo = customerInfo;
+        }
+
+        public String getOtherInfo() {
+            return otherInfo;
+        }
+
+        public void setOtherInfo(String otherInfo) {
+            this.otherInfo = otherInfo;
+        }
+
+        @Override
+        public String toString() {
+            return "orderInfo{" +
+                    "customerInfo='" + customerInfo + '\'' +
+                    ", otherInfo='" + otherInfo + '\'' +
+                    '}';
+        }
